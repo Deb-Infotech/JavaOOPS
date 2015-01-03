@@ -7,7 +7,7 @@ Benefits: Using Ant For Build / Execution.
 <project name="realJavaOOPS" basedir="." default="info">
 	
 	<!--properties-->
-	<property name="lib.dir" value="${basedir}/../lib"/>
+	<property name="lib.dir" value="${basedir}/lib"/>
 	<property name="source.dir" value="src"/>
 	<property name="build.dir" value="bin"/>
 	<property name="output.dir" value="result"/>
