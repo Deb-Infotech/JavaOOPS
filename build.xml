@@ -1,0 +1,117 @@
+<!--
+Author: Debasish Pradhan
+Creation Date: 22-Sept-2014
+Description: All Phases/Steps Involved In Instrumenting/Reporting Coverage In Clear-Concise Manner.
+Benefits: Using Ant For Build / Execution.
+-->
+<project name="realJavaOOPS" basedir="." default="info">
+	
+	<!--properties-->
+	<property name="lib.dir" value="${basedir}/../lib"/>
+	<property name="source.dir" value="src"/>
+	<property name="build.dir" value="bin"/>
+	<property name="output.dir" value="result"/>
+	<property name="build.instrument.dir" value="instrument"/>
+	<property name="datafile.cobertura" value="${ant.project.name}.ser"/>
+	<property name="cobertura.dir" value="${lib.dir}/cobertura-2.0.3"/>
+	<!--References-->
+	<path id="sourcecompilation.libs">
+		<pathelement location="${lib.dir}/testng-6.8.jar"/>	
+	</path>
+	<path id="classpath.cobertura">
+		<fileset dir="${cobertura.dir}">
+			<include name="**/*.jar"/>
+		</fileset>
+	</path>
+	
+	<!--taskdef-->
+	<taskdef resource="net/sf/antcontrib/antlib.xml" classpath="${lib.dir}/ant-contrib.jar"/>
+	<taskdef resource="testngtasks" classpath="${lib.dir}/testng-6.8.jar"/>	 
+	<taskdef resource="tasks.properties">
+		<classpath>
+			<path refid="classpath.cobertura"/>
+		</classpath>
+	</taskdef>
+	<!--targets-->
+	<target name="info" description="echoes usage">
+		<echo>Usage										:Target</echo>
+		<echo>Clean/Delete Runtime Folders				:clean</echo>
+		<echo>Create Required Folders					:init</echo>
+		<echo>Compile									:compile</echo>
+		<echo>instrument binary using cobertura			:coberturainstrument</echo>
+		<echo>execute against instrumented binary		:getcoveragereport</echo>
+		<echo>execute against non instrumentd binary	:execute</echo>
+	</target><!--info ends-->
+	
+	<target name="clean" description="Clean/Delete Runtime Folders">
+		
+		<!--below is example of if/then using ant-contrib jar, an external lib defined using taskdef above-->
+		<if>
+			<available file="${build.dir}" />
+				<then>
+					<delete failonerror="true" includeemptydirs="true">
+						<fileset dir="${build.dir}" />   
+					</delete>
+				</then>			
+		</if>
+		<!--build will fail if failonerror=true and directory does not exist-->
+		<delete failonerror="false" includeemptydirs="true">
+    		<fileset dir="${output.dir}" />  
+			<fileset dir="${build.instrument.dir}" />  
+			<fileset dir="${basedir}" includes="*.ser" /> 
+		</delete>
+		
+	</target><!--clean ends-->
+	
+	<target name="init" description="" depends="clean">
+		<mkdir dir="${build.dir}"/>
+	</target><!--init ends-->
+	
+	<target name="compile" description="Create Required Folders" depends="init">
+		<javac debug="true" srcdir="${source.dir}" destdir="${build.dir}" classpathref="sourcecompilation.libs"/>
+	</target>
+	
+	<target name="execute" description="execute against non instrumentd binary" depends="compile">
+		<testng classpath="${build.dir}" outputdir="${output.dir}" usedefaultlisteners="true">
+			<xmlfileset file="testng.xml"/>			
+		</testng>
+	</target>
+	
+	<target name="coberturainstrument" description="instrument binary using cobertura" depends="compile">
+		<!--
+				Remove the coverage data file and any old instrumentation.
+				Already removed in cleanup target
+		-->	
+		<cobertura-instrument datafile="${datafile.cobertura}" todir="${build.instrument.dir}">
+			<!--
+				The following line causes instrument to ignore any
+				source line containing a reference to log4j, for the
+				purposes of coverage reporting.
+			-->
+						<ignore regex="org.apache.log4j.*" />
+			<fileset dir="${build.dir}">
+				<include name="**/*.class"/>				
+			</fileset>
+
+		</cobertura-instrument>
+	</target>
+	
+	<target name="getcoveragereport" description="execute against instrumented binary" depends="coberturainstrument">
+		<testng outputdir="${output.dir}" usedefaultlisteners="true">
+			<xmlfileset file="testng.xml"/>
+			<classpath>
+				<pathelement location="${build.instrument.dir}"/>
+				<pathelement location="${build.dir}"/>
+				<path refid="classpath.cobertura"/>
+			</classpath>
+			<!--if datafile is not set using key, then by default execution result is accumulated in auto generated file "cobertura.ser"
+				if this cobertura.ser file does not contain instrumented information generated during cobertura-instrement, then
+				coverage report is zero. Its essential to have instrumented information and execution result in same file.
+				To specify datafile other than default file, key has to be set. key should be :
+				key="net.sourceforge.cobertura.datafile"
+			-->
+			<sysproperty key="net.sourceforge.cobertura.datafile" file="${datafile.cobertura}" />
+		</testng>
+		<cobertura-report srcdir="${source.dir}" destdir="${output.dir}/coverage-report" datafile="${datafile.cobertura}" format="html"/>
+	</target>
+</project>
