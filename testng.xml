@@ -3,7 +3,7 @@
 <suite name="Suite">
   <test name="TestInheritance">
     <classes>
-      <class name="realJavaOOPS.test.TestInheritance"/>
+      <class name="test.TestInheritance"/>
     </classes>
   </test> <!-- Test -->
 </suite> <!-- Suite -->
