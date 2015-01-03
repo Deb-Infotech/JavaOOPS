@@ -113,5 +113,6 @@ Benefits: Using Ant For Build / Execution.
 			<sysproperty key="net.sourceforge.cobertura.datafile" file="${datafile.cobertura}" />
 		</testng>
 		<cobertura-report srcdir="${source.dir}" destdir="${output.dir}/coverage-report" datafile="${datafile.cobertura}" format="html"/>
+		<cobertura-report srcdir="${source.dir}" destdir="${output.dir}/coverage-report" datafile="${datafile.cobertura}" format="xml"/>
 	</target>
 </project>
