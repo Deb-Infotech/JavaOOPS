@@ -19,17 +19,5 @@ public class Child extends Parent
 	{
 		return this.getClass().getName();
 	}
-	
-	
-	public static void main(String [] str)
-	{
-		Parent parent=new Parent();	
-		Child child=new Child();
-	
-		System.out.println("parent.getPrivateString() = " + parent.getPrivateString());
-		System.out.println("child.getPrivateString() = " + child.getPrivateString());
-				
-		
-	}
 
 }
